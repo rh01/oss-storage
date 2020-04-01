@@ -1,6 +1,6 @@
 package meta
 
-import "github.com/rh01/baiduyun/utils"
+import "github.com/rh01/oss-storage/utils"
 
 // FileMeta 文件元数据信息结构体
 type FileMeta struct {
