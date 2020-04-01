@@ -10,8 +10,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/rh01/baiduyun/meta"
-	"github.com/rh01/baiduyun/utils"
+	"github.com/rh01/oss-storage/meta"
+	"github.com/rh01/oss-storage/utils"
 )
 
 const (

@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/rh01/baiduyun/handler"
+	"github.com/rh01/oss-storage/handler"
 )
 
 func main() {
