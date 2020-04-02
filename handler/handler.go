@@ -28,7 +28,6 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "static file not found.")
 			w.WriteHeader(http.StatusNotFound)
 		}
-		// w.Write(bytes)
 		io.WriteString(w, string(bytes))
 		w.WriteHeader(http.StatusOK)
 	} else if r.Method == "POST" {
@@ -41,6 +40,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		defer file.Close()
 
+		// 文件云信息保存
 		fileMeta := meta.FileMeta{
 			FileName: head.Filename,
 			Location: uploadPath + head.Filename,
@@ -52,6 +52,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
+		// 关闭文件句柄
 		defer newFile.Close()
 		fileMeta.FileSize, err = io.Copy(newFile, file)
 		if err != nil {
@@ -59,7 +60,7 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-
+		// 游标重新回到文件头部
 		newFile.Seek(0, 0)
 		fileMeta.FileSha1 = utils.FileSha1(newFile)
 		// meta.UpdateFileMeta(fileMeta)
@@ -73,8 +74,8 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		fmt.Fprint(w, buff.String())
-
-		// http.Redirect(w, r, "/file/upload/success", http.StatusFound)
+		// 上传成功重定向
+		http.Redirect(w, r, "/file/upload/success", http.StatusFound)
 	}
 }
 

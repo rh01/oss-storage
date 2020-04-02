@@ -14,6 +14,9 @@ func main() {
 	http.HandleFunc("/file/download", handler.DownloadHandler)
 	http.HandleFunc("/file/update", handler.FileMetaUpdataHandler)
 	http.HandleFunc("/file/remove", handler.FileDeleteHandler)
+
+	http.HandleFunc("/user/signup", handler.SignUpHandler)
+
 	err := http.ListenAndServe(":5000", nil)
 	if err != nil {
 		log.Fatal(err)

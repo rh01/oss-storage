@@ -1,4 +1,4 @@
-// Package db 主要实现了数据库层的逻辑
+// Package db 主要实现了数据库层的逻辑 --- file op
 package db
 
 import (
@@ -17,6 +17,7 @@ func OnFileUploadFinished(filehash string, filename string, filesize int64, file
 		fmt.Println("Failed to prepare statement, err: ", err.Error())
 		return false
 	}
+	// 关闭资源
 	defer stmt.Close()
 
 	ret, err := stmt.Exec(filehash, filename, filesize, fileaddr)
@@ -24,11 +25,10 @@ func OnFileUploadFinished(filehash string, filename string, filesize int64, file
 		fmt.Println(err.Error())
 		return false
 	}
-	if rf, err := ret.RowsAffected(); err == nil {
-		if rf <= 0 {
-			fmt.Printf("File with hash: %s has been uploaded before", filehash)
-			return false
-		}
+	// 判断是否重复注册
+	if rf, err := ret.RowsAffected(); err == nil && rf <= 0 {
+		fmt.Printf("File with hash: %s has been uploaded before", filehash)
+		return false
 	}
 	return true
 }
