@@ -39,7 +39,7 @@ type userInfo struct {
 // UserSignin : 检查用户名是否存在并且密码是否正确
 func UserSignin(username string, encpwd string) bool {
 	stmt, err := mydb.DBConn().Prepare(
-		"select user_name, passwd from tbl_user where username=? limit 1")
+		"select user_name, user_pwd from tbl_user where user_name=? limit 1")
 	if err != nil {
 		fmt.Printf("Failed to get username [%s], err: %v", username, err.Error())
 		return false
@@ -47,7 +47,7 @@ func UserSignin(username string, encpwd string) bool {
 	defer stmt.Close()
 
 	u := userInfo{}
-	err = stmt.QueryRow().Scan(&u.userName, &u.passwd)
+	err = stmt.QueryRow(username).Scan(&u.userName, &u.passwd)
 	if err != nil {
 		fmt.Printf("Failed to query row username [%s], err: %v", username, err.Error())
 		return false

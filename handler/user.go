@@ -54,7 +54,9 @@ func SiginHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
 	username := r.Form.Get("username")
-	encpasswd := r.Form.Get("password")
+	passWord := r.Form.Get("password")
+	encpasswd := utils.Sha1([]byte(passWord + pwdSalt))
+
 	// 校验用户名和密码
 	pwdChecked := userdb.UserSignin(username, encpasswd)
 	if !pwdChecked {
@@ -62,9 +64,29 @@ func SiginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// 生成访问凭证 -- token
-	_ = genToken(username)
-
+	token := genToken(username)
+	updateResult := userdb.UpdateToken(username, token)
+	if !updateResult {
+		w.Write([]byte("FAILED"))
+		return
+	}
 	// 登陆成功之后重定向首页--上传页面
+	// http.Redirect(w, r, "/home", http.StatusFound)
+	// w.Write([]byte("http://" + r.Host + "/static/view/home.html"))
+	resp := utils.RespMsg{
+		Code: 0,
+		Msg:  "OK",
+		Data: struct {
+			Location string
+			Username string
+			Token    string
+		}{
+			Location: "http://" + r.Host + "/static/view/home.html",
+			Username: username,
+			Token:    token,
+		},
+	}
+	w.Write(resp.JSONBytes())
 }
 
 func genToken(username string) string {
@@ -73,4 +95,18 @@ func genToken(username string) string {
 	ts := fmt.Sprintf("%x", time.Now().Unix())
 	tokenPrefix := utils.MD5([]byte(username + ts + tokenSalt))
 	return tokenPrefix + ts[:8]
+}
+
+// HomeHandler 首页控制器
+func HomeHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		data, err := ioutil.ReadFile("./static/view/home.html")
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		// TODO: 比较 io.WriteString() 和 w.Write 以及 fmt.Fprint 性能问题
+		w.Write(data)
+		return
+	}
 }
