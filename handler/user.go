@@ -13,7 +13,7 @@ import (
 
 const (
 	// 用于加密的盐值(自定义)
-	pwdSalt = "^%#890"
+	pwdSalt   = "^%#890"
 	tokenSalt = "_tokensalt"
 )
 
@@ -62,7 +62,7 @@ func SiginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// 生成访问凭证 -- token
-	token := genToken(ueername)
+	_ = genToken(username)
 
 	// 登陆成功之后重定向首页--上传页面
 }
