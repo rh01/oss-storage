@@ -96,7 +96,7 @@ func GetFileMetaHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var buff bytes.Buffer
-	err := json.NewEncoder(&buff).Encode(&fMeta)
+	err = json.NewEncoder(&buff).Encode(&fMeta)
 	if err != nil {
 		fmt.Fprintf(w, "Failed to encode fileMeta, err: %v\n", err.Error())
 		w.WriteHeader(http.StatusBadRequest)
