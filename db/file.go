@@ -1,3 +1,4 @@
+// Package db 主要实现了数据库层的逻辑
 package db
 
 import (

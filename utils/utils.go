@@ -1,3 +1,4 @@
+// Package utils 实现了有关文件的编码功能函数
 package utils
 
 import (

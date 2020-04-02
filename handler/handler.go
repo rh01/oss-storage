@@ -1,3 +1,4 @@
+// Package handler 主要实现controller功能
 package handler
 
 import (

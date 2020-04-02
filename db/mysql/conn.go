@@ -1,3 +1,4 @@
+// Package mysql mysql存储对象初始化
 package mysql
 
 import (

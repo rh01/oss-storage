@@ -1,3 +1,4 @@
+// Package meta 主要实现了usecase层或者对象层的逻辑
 package meta
 
 import (
