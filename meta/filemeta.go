@@ -1,6 +1,9 @@
 package meta
 
-import "github.com/rh01/oss-storage/utils"
+import (
+	mydb "github.com/rh01/oss-storage/db"
+	"github.com/rh01/oss-storage/utils"
+)
 
 // FileMeta 文件元数据信息结构体
 type FileMeta struct {
@@ -38,4 +41,9 @@ func RemoveFileMeta(fSha1 string) error {
 	}
 	delete(fileMetas, fSha1)
 	return nil
+}
+
+// UploadFileMetaDB 上传文件元数据信息刀片数据库
+func UploadFileMetaDB(fMeta *FileMeta) bool {
+	return mydb.OnFileUploadFinished(fMeta.FileSha1, fMeta.FileName, fMeta.FileSize, fMeta.Location)
 }

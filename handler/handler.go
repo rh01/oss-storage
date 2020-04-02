@@ -61,7 +61,8 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 
 		newFile.Seek(0, 0)
 		fileMeta.FileSha1 = utils.FileSha1(newFile)
-		meta.UpdateFileMeta(fileMeta)
+		// meta.UpdateFileMeta(fileMeta)
+		_ = meta.UploadFileMetaDB(&fileMeta)
 
 		var buff = &bytes.Buffer{}
 		err = json.NewEncoder(buff).Encode(fileMeta)
