@@ -1,3 +1,4 @@
+// Package db 主要实现了数据库层的逻辑 -- user token op
 package db
 
 import (

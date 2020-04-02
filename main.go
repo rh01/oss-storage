@@ -25,7 +25,7 @@ func main() {
 	http.HandleFunc("/user/signup", handler.SignUpHandler)
 	http.HandleFunc("/user/signin", handler.SiginHandler)
 
-	// 首页
+	// 首页展示
 	http.HandleFunc("/home", handler.HomeHandler)
 
 	err := http.ListenAndServe(":5000", nil)
