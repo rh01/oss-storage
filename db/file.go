@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"fmt"
 
 	mydb "github.com/rh01/oss-storage/db/mysql"
@@ -29,4 +30,30 @@ func OnFileUploadFinished(filehash string, filename string, filesize int64, file
 		}
 	}
 	return true
+}
+
+// TableFile is a return struct
+type TableFile struct {
+	FileHash string
+	FileName sql.NullString
+	FileSize sql.NullInt64
+	FileAddr sql.NullString
+}
+
+//GetFileMeta 从mysql获取元数据信息
+func GetFileMeta(filehash string) (*TableFile, error) {
+	stmt, err := mydb.DBConn().Prepare("select file_sha1, file_name, file_size, file_addr from tbl_file where file_sha1=? and status=1 limit 1")
+	if err != nil {
+		fmt.Println("Not Found, err: ", err.Error())
+		return nil, err
+	}
+	defer stmt.Close()
+
+	tFile := TableFile{}
+	err = stmt.QueryRow(filehash).Scan(&tFile.FileHash, &tFile.FileName, &tFile.FileSize, &tFile.FileAddr)
+	if err != nil {
+		fmt.Println(err)
+		return nil, err
+	}
+	return &tFile, nil
 }

@@ -88,7 +88,13 @@ func GetFileMetaHandler(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
 
 	filehash := r.Form.Get("filehash")
-	fMeta := meta.GetFileMeta(filehash)
+	// fMeta := meta.GetFileMeta(filehash)
+	fMeta, err := meta.GetFileMetaDB(filehash)
+	if err != nil {
+		fmt.Fprintf(w, "Failed to encode fileMeta, err: %v\n", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 	var buff bytes.Buffer
 	err := json.NewEncoder(&buff).Encode(&fMeta)
 	if err != nil {
