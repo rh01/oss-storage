@@ -51,6 +51,11 @@ func SignUpHandler(w http.ResponseWriter, r *http.Request) {
 
 // SiginHandler : 用户登陆接口
 func SiginHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+		http.Redirect(w, r, "/static/view/signin.html", http.StatusFound)
+		return
+	}
+
 	r.ParseForm()
 
 	username := r.Form.Get("username")

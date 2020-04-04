@@ -9,8 +9,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
+	"github.com/rh01/oss-storage/db"
 	"github.com/rh01/oss-storage/meta"
 	"github.com/rh01/oss-storage/utils"
 )
@@ -66,16 +68,28 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 		// meta.UpdateFileMeta(fileMeta)
 		_ = meta.UploadFileMetaDB(&fileMeta)
 
-		var buff = &bytes.Buffer{}
-		err = json.NewEncoder(buff).Encode(fileMeta)
-		if err != nil {
-			fmt.Fprintf(w, "Failed to encode file, err: %v\n", err.Error())
-			w.WriteHeader(http.StatusBadRequest)
-			return
+		// TODO 更新用户文件表记录
+		r.ParseForm()
+		username := r.Form.Get("username")
+		suc := db.OnUserFileUploadFinished(username,
+			fileMeta.FileSha1, fileMeta.FileName, fileMeta.FileSize)
+		if suc {
+			http.Redirect(w, r, "/static/view/home.html", http.StatusFound)
+		} else {
+			w.Write([]byte("Upload Failed"))
 		}
-		fmt.Fprint(w, buff.String())
+
+		// 返回json字符串，dubug使用
+		// var buff = &bytes.Buffer{}
+		// err = json.NewEncoder(buff).Encode(fileMeta)
+		// if err != nil {
+		// 	fmt.Fprintf(w, "Failed to encode file, err: %v\n", err.Error())
+		// 	w.WriteHeader(http.StatusBadRequest)
+		// 	return
+		// }
+		// fmt.Fprint(w, buff.String())
 		// 上传成功重定向
-		http.Redirect(w, r, "/file/upload/success", http.StatusFound)
+		// http.Redirect(w, r, "/file/upload/success", http.StatusFound)
 	}
 }
 
@@ -83,6 +97,25 @@ func UploadHandler(w http.ResponseWriter, r *http.Request) {
 func UploadHandlerSuccess(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "success upload")
 	w.WriteHeader(http.StatusOK)
+}
+
+// FileQueryHandler : 批量查询的文件元信息
+func FileQueryHandler(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+
+	limitCnt, _ := strconv.Atoi(r.Form.Get("limit"))
+	username := r.Form.Get("username")
+	uFiles, err := db.QueryUserFileMetas(username, limitCnt)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	data, err := json.Marshal(uFiles)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	w.Write(data)
 }
 
 // GetFileMetaHandler 查询文件的元信息
