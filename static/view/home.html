@@ -86,55 +86,6 @@
     });
   }
 
-  function updateFileList() {
-    $.ajax({
-      url: "/file/query?" + queryParams(),
-      type: "POST",
-      data: {
-        limit: 15
-      },
-      error: function (jqXHR, textStatus, errorThrown) {
-        if (textStatus == "error") {
-          alert(textStatus + " : " + errorThrown);
-        } else {
-          alert(textStatus);
-        }
-      },
-      success: function (body, textStatus, jqXHR) {
-        if (!body) {
-          return;
-        }
-        var data = JSON.parse(body);
-        if (!data || data.length <= 0) {
-          return;
-        }
-
-        for (var i = 0; i < data.length; i++) {
-          var x = document.getElementById('filetbl').insertRow();
-          var cell = x.insertCell();
-          cell.innerHTML = data[i].FileHash.substr(0, 20)+"...";
-
-          cell = x.insertCell();
-          cell.innerHTML = data[i].FileName;
-
-          cell = x.insertCell();
-          cell.innerHTML = data[i].FileSize;
-
-          cell = x.insertCell();
-          cell.innerHTML = data[i].UploadAt;
-
-          cell = x.insertCell();
-          cell.innerHTML = data[i].LastUpdated;
-
-          cell = x.insertCell();
-          cell.innerHTML = '<button class="btn btn-success" ' +
-            'style="height:30px;margin:5px 0;"' +
-            'onClick = "downloadFile(\'http://localhost:8080/file/' +
-            'downloadurl?filehash=' + data[i].FileHash + '&' + queryParams() + '\')">下载</button>';
-        }
-      }
-    });
-  }
 
   function toUploadFile() {
     window.location.href = '/file/upload?' + queryParams();

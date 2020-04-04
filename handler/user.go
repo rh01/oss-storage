@@ -71,7 +71,6 @@ func SiginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// 登陆成功之后重定向首页--上传页面
-	// http.Redirect(w, r, "/home", http.StatusFound)
 	// w.Write([]byte("http://" + r.Host + "/static/view/home.html"))
 	resp := utils.RespMsg{
 		Code: 0,
@@ -89,12 +88,54 @@ func SiginHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write(resp.JSONBytes())
 }
 
+// UserInfoHandler  获取用户信息的接口
+func UserInfoHandler(w http.ResponseWriter, r *http.Request) {
+	// 解析请求参数
+	r.ParseForm()
+
+	username := r.Form.Get("username")
+	// TODO：使用拦截器处理这一部分的逻辑
+	// token := r.Form.Get("token")
+	// 验证token是否有效
+	// isValidToken := isTokenVaild(token)
+	// if !isValidToken {
+	// 	w.WriteHeader(http.StatusForbidden)
+	// 	return
+	// }
+
+	// 查询用户信息
+	user, err := userdb.GetUserInfo(username)
+	if err != nil {
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+
+	// 组装并且响应用户数据
+	resp := &utils.RespMsg{
+		Code: 0,
+		Msg:  "OK",
+		Data: user,
+	}
+	w.Write(resp.JSONBytes())
+}
+
 func genToken(username string) string {
 	// 32 bits + 8 bits
 	// 40bits: md5(username + timestamp + token_salt) +timestamp[:8]
 	ts := fmt.Sprintf("%x", time.Now().Unix())
 	tokenPrefix := utils.MD5([]byte(username + ts + tokenSalt))
 	return tokenPrefix + ts[:8]
+}
+
+// isTokenVaild 判断当前的token是否有效
+func isTokenVaild(token string) bool {
+	if len(token) != 40 {
+		return false
+	}
+	// TODO: 判断token的时效性，是否过期
+	// TODO: 从数据库表tbl_user_token查询username对应的token信息
+	// TODO: 对比两个token是否一致
+	return true
 }
 
 // HomeHandler 首页控制器

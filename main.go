@@ -24,6 +24,7 @@ func main() {
 	// 用户登录和注册控制器
 	http.HandleFunc("/user/signup", handler.SignUpHandler)
 	http.HandleFunc("/user/signin", handler.SiginHandler)
+	http.HandleFunc("/user/info", handler.HTTPInterceptor(handler.UserInfoHandler))
 
 	// 首页展示
 	http.HandleFunc("/home", handler.HomeHandler)

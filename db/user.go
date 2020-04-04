@@ -41,7 +41,7 @@ func UserSignin(username string, encpwd string) bool {
 	stmt, err := mydb.DBConn().Prepare(
 		"select user_name, user_pwd from tbl_user where user_name=? limit 1")
 	if err != nil {
-		fmt.Printf("Failed to get username [%s], err: %v", username, err.Error())
+		fmt.Printf("Failed to get username [%s], err: %v\n", username, err.Error())
 		return false
 	}
 	defer stmt.Close()
@@ -49,15 +49,48 @@ func UserSignin(username string, encpwd string) bool {
 	u := userInfo{}
 	err = stmt.QueryRow(username).Scan(&u.userName, &u.passwd)
 	if err != nil {
-		fmt.Printf("Failed to query row username [%s], err: %v", username, err.Error())
+		fmt.Printf("Failed to query row username [%s], err: %v\n", username, err.Error())
 		return false
 	}
 
 	if u.passwd.String != encpwd {
-		fmt.Printf("password not equal encpwd  [%s]", encpwd)
+		fmt.Printf("password not equal encpwd  [%s]\n", encpwd)
 		return false
 	}
 	return true
+}
+
+// User 用户信息，返回的数据结构体
+type User struct {
+	Username     string
+	Email        string
+	Phone        string
+	SignupAt     string
+	LastActiveAt string
+	Status       int
+}
+
+// GetUserInfo : 获取用户信息
+func GetUserInfo(username string) (User, error) {
+	stmt, err := mydb.DBConn().Prepare(
+		"select user_name, signup_at from tbl_user where user_name=? limit 1",
+	)
+
+	u := User{}
+	if err != nil {
+		fmt.Printf("User [%s] not found, err: %v\n", username, err)
+		return u, err
+	}
+	defer stmt.Close()
+
+	// 执行查询操作哦
+	err = stmt.QueryRow(username).Scan(&u.Username, &u.SignupAt)
+	if err != nil {
+		fmt.Printf("err: %v\n", err)
+		return u, err
+	}
+
+	return u, nil
 }
 
 // UserSignin : 检查用户名是否存在并且密码是否正确
