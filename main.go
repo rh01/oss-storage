@@ -21,6 +21,7 @@ func main() {
 	http.HandleFunc("/file/download", handler.HTTPInterceptor(handler.DownloadHandler))
 	http.HandleFunc("/file/update", handler.HTTPInterceptor(handler.FileMetaUpdataHandler))
 	http.HandleFunc("/file/remove", handler.HTTPInterceptor(handler.FileDeleteHandler))
+	http.HandleFunc("/file/fastupload", handler.HTTPInterceptor(handler.TryFastUploadHandler))
 
 	// 用户登录和注册控制器
 	http.HandleFunc("/user/signup", handler.SignUpHandler)
