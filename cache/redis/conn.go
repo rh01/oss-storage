@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	poll      *redis.Pool
+	pool      *redis.Pool
 	redisHost = "127.0.0.1:6379"
 	redisPass = "yourpassword"
 )
@@ -46,10 +46,10 @@ func newRedisPool() *redis.Pool {
 }
 
 func init() {
-	poll = newRedisPool()
+	pool = newRedisPool()
 }
 
 // RedisPoll : 返回一个redis连接对象
-func RedisPoll() *redis.Pool {
-	return poll
+func RedisPool() *redis.Pool {
+	return pool
 }
