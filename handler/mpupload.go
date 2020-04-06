@@ -122,7 +122,7 @@ func CompleteUploadPartHandler(w http.ResponseWriter, r *http.Request) {
 	defer rConn.Close()
 
 	//3 通过uploadid查询redis并判断是否所有分块上传完成
-	data, err := redis.Values(rConn.Do("HGETALL", "MP_"+upid))
+	data, err := redis.Values(rConn.Do("HGETALL", mpPrefix+upid))
 	if err != nil {
 		w.Write(utils.NewRespMsg(-1, "complete upload failed", nil).JSONBytes())
 		return
