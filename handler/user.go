@@ -7,7 +7,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/rh01/oss-storage/db"
 	userdb "github.com/rh01/oss-storage/db"
+	mydb "github.com/rh01/oss-storage/db/mysql"
 	"github.com/rh01/oss-storage/utils"
 )
 
@@ -133,18 +135,40 @@ func genToken(username string) string {
 }
 
 // isTokenVaild 判断当前的token是否有效
-func isTokenVaild(token string) bool {
+func isTokenVaild(username, token string) bool {
 	if len(token) != 40 {
 		return false
 	}
-	// TODO: 判断token的时效性，是否过期
-	// TODO: 从数据库表tbl_user_token查询username对应的token信息
-	// TODO: 对比两个token是否一致
+	stmt, err := mydb.DBConn().Prepare("select user_token from tbl_user_token where user_name=?")
+	if err != nil {
+		fmt.Println("err: ", err.Error())
+		return false
+	}
+	var userToken string
+	err = stmt.QueryRow(username).Scan(&userToken)
+	if err != nil {
+		fmt.Printf("Error: %v", err)
+		return false
+	}
+	if userToken != token {
+		fmt.Println("token 不匹配")
+		return false
+	}
 	return true
 }
 
 // HomeHandler 首页控制器
 func HomeHandler(w http.ResponseWriter, r *http.Request) {
+	// r.ParseForm()
+	username := r.Form.Get("username")
+	token := r.Form.Get("token")
+	fmt.Println(username, token)
+	if !isTokenVaild(username, token) {
+		fmt.Println("innnn")
+		http.Redirect(w, r, "/user/signin", http.StatusFound)
+		// w.WriteHeader(http.StatusForbidden)
+		return
+	}
 	if r.Method == http.MethodGet {
 		data, err := ioutil.ReadFile("./static/view/home.html")
 		if err != nil {
@@ -153,6 +177,17 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		// TODO: 比较 io.WriteString() 和 w.Write 以及 fmt.Fprint 性能问题
 		w.Write(data)
+		return
+	}
+}
+
+// LogoutHandler 首页控制器
+func LogoutHandler(w http.ResponseWriter, r *http.Request) {
+	// r.ParseForm()
+	username := r.Form.Get("username")
+	suc := db.UserSignout(username)
+	if suc {
+		http.Redirect(w, r, "/user/signin", http.StatusFound)
 		return
 	}
 }

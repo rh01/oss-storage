@@ -30,7 +30,6 @@
             <div style="text-align: top;height:20%;margin: 10px 0 0 10px;">
               <img style="width:80px;height:80px;" src="/static/img/avatar.jpeg"></img><br>
               用户名: <p id="username" style="color: seagreen"></p>
-              当前用户: <p id="role"" style="color: seagreen"></p>
               注册时间: <p id="regtime" style="color: seagreen"></p>
             </div>
             <div style="height: 80%;"></div>
@@ -39,12 +38,12 @@
             <div style="width:100%;height: 100%;background:rgb(202, 157, 248);"></div>
           </td>
           <td style="text-align: top;">
-            <div>我的申请
+            <div>需要处理的离职申请
               <button class="btn btn-success" onclick="home()" style="float: right;margin-right: 90px;">首页
               </button>
-              <button class="btn btn-success" onclick="managerApplyFile()" id="shenhe" style="float: right;margin-right: 60px;visibility:hidden">审核
+              <button class="btn btn-success" onclick="managerApplyFile()" style="float: right;margin-right: 60px;visibility:hidden">管理
               </button>
-              <button class="btn btn-success" onclick="toUploadFile()" id="dengji" style="float: right;margin-right: 30px;visibility:hidden">登记
+              <button class="btn btn-success" onclick="toUploadFile()" style="float: right;margin-right: 30px;visibility:hidden">申请
               </button>
               <div style="width:100%;height: 1px;background:rgb(202, 157, 248);margin-top: 15px;"></div>
             </div>
@@ -54,8 +53,8 @@
                   <tr style="height:50px;border:1px;">
                     <th>登记人</th>
                     <th>RD邮箱</th>
-                    <th>登记时间</th>
-                    <th>当前状态</th>
+                    <th>审核时间</th>
+                    <th>操作</th>
                   </tr>
                 </thead>
               </table>
@@ -81,25 +80,18 @@
         }
       },
       success: function (body, textStatus, jqXHR) {
-        var roleM = {0:"普通用户", 1:"IT部门", 2:"SA部门", 3:"admin"}; // 定义一个权限映射字典
         var resp = JSON.parse(body);
         document.getElementById("username").innerHTML = resp.data.Username;
-        document.getElementById("role").innerHTML = roleM[resp.data.Role];
         document.getElementById("regtime").innerHTML = resp.data.SignupAt;
-        if (roleM[resp.data.Role] == "SA部门") {
-          document.getElementById("shenhe").style.visibility="visible";
-        }
-        if (roleM[resp.data.Role] == "IT部门") {
-          document.getElementById("dengji").style.visibility="visible";
-        }
         updateFileList();
       }
     });
   }
 
+  // SA账户获取当前需要审核的离职申请
   function updateFileList() {
     $.ajax({
-      url: "/file/query?" + queryParams(),
+      url: "/file/queryAll?" + queryParams(),
       type: "POST",
       data: {
         limit: 15
@@ -112,29 +104,30 @@
         }
       },
       success: function (body, textStatus, jqXHR) {
-        const roleM = {1:"待SA审核", 2:"审核完成", 3:"待删除", 4:"删除完成"}; // 定义一个权限映射字典
         if (!body) {
           return;
         }
         var data = JSON.parse(body);
-        if (data.length <= 0) {
+        if (!data || data.length <= 0) {
           return;
         }
+        console.log(data);
 
         for (var i = 0; i < data.length; i++) {
           var x = document.getElementById('filetbl').insertRow();
           var cell = x.insertCell();
           cell.innerHTML = data[i].UserName;
-
           cell = x.insertCell();
           cell.innerHTML = data[i].RdEmail;
 
           cell = x.insertCell();
           cell.innerHTML =  data[i].ApplyAt;
 
-
           cell = x.insertCell();
-          cell.innerHTML =  roleM[data[i].FinishTag];
+          cell.innerHTML = '<button class="btn btn-success" ' +
+            'style="height:30px;margin:5px 0;"' +
+            'onClick = "agree(\'http://localhost:5000/file/' +
+            'agree?rd_email=' + data[i].RdEmail + '&' + queryParams() + '\')">同意</button>';
         }
       }
     });
@@ -142,6 +135,24 @@
 
   function home() {
     window.location.href = '/home?' + queryParams();
+  }
+
+
+  function agree(durl) {
+    $.ajax({
+      url: durl,
+      type: "POST",
+      error: function () {
+        if (textStatus == "error") {
+          alert(textStatus + " : " + errorThrown);
+        } else {
+          alert(textStatus);
+        }
+      },
+      success: function () {
+        window.location.href = '/file/manage?' + queryParams();
+      }
+    });
   }
 
   function modifyApply() {
@@ -156,34 +167,6 @@
     window.location.href = '/file/manage?' + queryParams();
   }
 
-  function deleteApply() {
-    window.location.href = '/file/delete?' + queryParams();
-  }
-
-  function downloadFile(durl) {
-    $.ajax({
-      url: durl,
-      type: "POST",
-      error: function (jqXHR, textStatus, errorThrown) {
-        if (textStatus == "error") {
-          alert(textStatus + " : " + errorThrown);
-        } else {
-          alert(textStatus);
-        }
-      },
-      success: function (body, textStatus, jqXHR) {
-        try {
-          alert("文件即将下载自: " + body);
-          var elemIF = document.createElement("iframe");
-          elemIF.src = body;
-          elemIF.style.display = "none";
-          document.body.appendChild(elemIF);
-        } catch (e) {
-          alert(e);
-        }
-      }
-    });
-  }
 </script>
 
 </html>

@@ -7,7 +7,7 @@ import (
 	mydb "github.com/rh01/oss-storage/db/mysql"
 )
 
-// UpdateToken : 更新用户tokene
+// UpdateToken : 更新用户token，用来登陆使用
 func UpdateToken(username string, token string) bool {
 	stmt, err := mydb.DBConn().Prepare(
 		"replace into tbl_user_token (`user_name`,`user_token`) values (?, ?)")

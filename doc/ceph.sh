@@ -6,4 +6,10 @@ docker run -d --net cephnet --ip 192.168.44.11 -v /Users/rh01/temp/etc_ceph/:/et
 docker run -d --net cephnet --ip 192.168.44.12 -v /Users/rh01/temp/etc_ceph/:/etc/ceph -v /Users/rh01/temp/var_lib_ceph/:/var/lib/ceph --name mgr --hostname mgr ceph/daemon:latest-mimic mgr
 # osd
 docker run -d --net cephnet --ip 192.168.44.13 -v /Users/rh01/temp/etc_ceph/:/etc/ceph -v /Users/rh01/temp/var_lib_ceph/:/var/lib/ceph --name osd --hostname osd -e OSD_TYPE=directory ceph/daemon:latest-mimic osd
+docker run -d --net cephnet --ip 192.168.44.14 -v /Users/rh01/temp/etc_ceph/:/etc/ceph -v /Users/rh01/temp/var_lib_ceph/:/var/lib/ceph --name gwnode --hostname osd -e OSD_TYPE=directory ceph/daemon:latest-mimic osd
+radosgw
+
+# xxxxxxxxx
+docker run -d --privileged=true --rm -v /dev/:/dev/ -e OSD_DEVICE=/dev/sdb ceph/daemon:latest-mimic zap_device
+
 
